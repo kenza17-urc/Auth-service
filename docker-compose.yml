@@ -1,0 +1,39 @@
+
+services:
+  auth-service:
+    build: ./Auth
+    ports:
+      - "3001:3001"
+    environment:
+      - MONGO_URI=mongodb+srv://khammoudi17:Kenza17@cluster0.1uhy5vj.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+      - JWT_SECRET=hXkbYbd7nd
+      - PORT=3001
+    depends_on:
+      - mongo
+    networks:
+      - backend
+      
+  api-gateway:
+    build: ./API Gateway
+    ports:
+      - "3002:3002"
+    depends_on:
+      - auth-service
+    environment:
+      - PORT=3002
+    networks:
+      - backend
+      - frontend
+  mongo:
+    image: mongo:6.7.0
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - backend
+
+volumes:
+  mongo-data:
+
+networks:
+  frontend:
+  backend:
