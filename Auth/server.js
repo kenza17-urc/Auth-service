@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3001;
 app.use(bodyParser.json());
 
 mongoose.connect(process.env.MONGO_URI, {
-  ssl: true
+  ssl: process.env.MONGO_SSL
 }).then(() => {
   console.log('Connected to MongoDB');
 }).catch((error) => {

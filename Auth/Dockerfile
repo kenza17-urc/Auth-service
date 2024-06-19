@@ -1,16 +1,13 @@
+FROM node:20
 
-FROM node:18
+WORKDIR /app
 
-WORKDIR /usr/src/app
-
-COPY package*.json ./
+COPY . .
 
 RUN npm install
 
 RUN npm install -g nodemon
 
-COPY . .
+EXPOSE ${PORT}
 
-EXPOSE 3001
-
-CMD ["nodemon", "src/server.js"]
+CMD ["npm", "run", "dev"]

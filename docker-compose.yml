@@ -1,41 +1,78 @@
-
 services:
-  auth-service:
-    build: ./Auth
-    volumes:
-      - ./Auth:/usr/src/app
-    environment:
-      - MONGO_URI=mongodb+srv://khammoudi17:Kenza17@cluster0.1uhy5vj.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
-      - JWT_SECRET=hXkbYbd7nd
-      - PORT=3001
-    depends_on:
-      - mongo
-    networks:
-      - backend
-      
   api-gateway:
-    build: ./API Gateway
+    build:
+      context: ./API Gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
     ports:
-      - "3002:3002"
-    volumes:
-      - ./API\ Gateway:/usr/app
+      - 3002:3002
     depends_on:
-      - auth-service
+      - auth
+      - product-service
+    env_file:
+      - ./API Gateway/.env
+    develop:
+      watch:
+        - path: ./API Gateway/
+          target: /app/
+          action: sync
+        - path: ./API Gateway/package.json
+          action: rebuild
+  auth:
+    build:
+      context: ./Auth
+      dockerfile: Dockerfile
+    container_name: auth
+    depends_on:
+      - mongodb-auth
+    env_file:
+      - ./Auth/.env
+    develop:
+      watch:
+        - path: ./Auth/
+          target: /app/
+          action: sync
+        - path: ./Auth/package.json
+          action: rebuild
+  product-service:
+    build:
+      context: ./product-service
+      dockerfile: Dockerfile
+    container_name: product-service
+    depends_on:
+      - mongodb-products
+    env_file:
+      - ./product-service/.env
+    develop:
+      watch:
+        - path: ./product-service/
+          target: /app/
+          action: sync
+        - path: ./product-service/package.json
+          action: rebuild
+  mongodb-auth:
+    image: mongo:latest
+    container_name: mongodb-auth
+    restart: always
     environment:
-      - PORT=3002
-    networks:
-      - backend
-      - frontend
-  mongo:
-    image: mongo:4.4.6
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
     volumes:
-      - mongo-data:/data/db
-    networks:
-      - backend
+      - mongodb_auth:/data/db
+    ports:
+      - 27018:27017
+  mongodb-products:
+    image: mongo:latest
+    container_name: mongodb-products
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - mongodb_products:/data/db
+    ports:
+      - 27019:27017
 
 volumes:
-  mongo-data:
-
-networks:
-  frontend:
-  backend:
+  mongodb_auth:
+  mongodb_products:
